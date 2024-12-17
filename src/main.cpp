@@ -129,7 +129,11 @@ public:
     }
     void Start()
     {
+#ifdef SFML_SYSTEM_EMSCRIPTEN
+        window.create(VideoMode(1920 * 4, 1080 * 4), "ToInfinity", Style::None);
+#else
         window.create(VideoMode(1920, 1080), "ToInfinity", Style::None);
+#endif
         window.setVerticalSyncEnabled(1);
 
         //bgColor.emplace_back(Color::Black);
@@ -239,7 +243,7 @@ public:
             counters[i].setOrigin(counters[i].getLocalBounds().width / 2, counters[i].getLocalBounds().height / 2);
         }
 #ifdef FANCYMODE
-        bgShader.loadFromFile("bgShader.glsl", Shader::Fragment);
+        bgShader.loadFromFile("defaultVertex.glsl", "bgShader.glsl");
         bgShader.setUniform("goldColor", Glsl::Vec4(bgColor[3].r / 255.f, bgColor[3].g / 255.f, bgColor[3].b / 255.f, 1));
         bgShader.setUniform("whiteColor", Glsl::Vec4(bgColor[2].r / 255.f, bgColor[2].g / 255.f, bgColor[2].b / 255.f, 1));
         bgShader.setUniform("greenColor", Glsl::Vec4(bgColor[4].r / 255.f, bgColor[4].g / 255.f, bgColor[4].b / 255.f, 1));
@@ -470,10 +474,17 @@ public:
             window.setView(view);
 
             window.draw(snowFlakeSystem);
+#ifdef FANCYMODE
             if (VertexBuffer::isAvailable())
                 window.draw(buff, &bgShader);
             else
                 window.draw(arr, &bgShader);
+#else
+            if (VertexBuffer::isAvailable())
+                window.draw(buff);
+            else
+                window.draw(arr);
+#endif
 
             for (int i = 0; i < wallBreak.size(); i++)
                 window.draw(wallBreak[i]);
